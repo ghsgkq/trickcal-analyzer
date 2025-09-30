@@ -9,15 +9,17 @@
 <body>
     <div class="container">
         <h1>🎮 트릭컬 리바이브 결제 내역 분석</h1>
-        <p>Google Play에서 다운로드한 'Order History.json' 파일을 업로드하세요.</p>
-        
+        <p>
+            Google Play에서 다운로드한 'Order History.json' 파일을 업로드하세요. 
+            (<a href="guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
+        </p>
         <input type="file" id="jsonFile" accept=".json">
 
         <div id="summary" class="summary-box"></div>
         <div id="daily-summary" class="summary-box secondary"></div>
         <div id="pass-summary" class="summary-box tertiary"></div>
-        
         <div id="sashik-pass-summary" class="summary-box quaternary"></div>
+
         <div id="monthly-report">
             <h2>📅 월별 결제 금액 요약</h2>
             <table id="monthly-table">
@@ -38,7 +40,7 @@
                     <button class="filter-btn" data-filter="데일리 엘리프 공물">데일리 엘리프</button>
                     <button class="filter-btn" data-filter="pass_basic">리바이브/트릭컬 패스</button>
                     <button class="filter-btn" data-filter="pass_sashik">사복 패스</button>
-                    </div>
+                </div>
             </div>
 
             <table id="details-table">
