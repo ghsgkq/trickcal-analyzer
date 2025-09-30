@@ -116,17 +116,17 @@ function displayMonthlyChart(monthlyData) {
     const maxAmount = Math.max(...amounts, 1);
 
     let chartHTML = '';
-    let lastYear = ''; // 이전 년도를 기억할 변수
+    let lastYear = '';
 
     sortedMonths.forEach(month => {
         const amount = monthlyData[month];
-        const barHeight = (amount / maxAmount) * 100;
+        // 막대의 최대 높이를 90%로 제한하여 상단에 텍스트 공간 확보
+        const barHeight = (amount / maxAmount) * 90; 
         
-        const currentYear = month.substring(2, 4); // '2024-01' -> '24'
-        const currentMonth = month.substring(5); // '2024-01' -> '01'
+        const currentYear = month.substring(2, 4);
+        const currentMonth = month.substring(5);
         
         let label = '';
-        // 연도가 바뀌거나 첫번째 데이터일 경우 연도 표시
         if (currentYear !== lastYear) {
             label = `${currentYear}년\n${currentMonth}월`;
             lastYear = currentYear;
