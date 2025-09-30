@@ -78,30 +78,63 @@ function displayPassReport(data) {
 
 function displaySashikPassReport(data) {
     const sashikTotal = data
-        .filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스")) // "사복패스" 조건 추가
+        .filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"))
         .reduce((sum, item) => sum + item.price, 0);
     const sashikSummaryDiv = document.getElementById('sashik-pass-summary');
     sashikSummaryDiv.innerHTML = `사복 패스 총 결제액: <strong>₩${sashikTotal.toLocaleString()}</strong>`;
     sashikSummaryDiv.style.display = 'block';
 }
 
+
 function displayMonthlyReport(data) {
     const monthlyTotals = {};
     data.forEach(item => {
         const month = item.date.getFullYear() + '-' + String(item.date.getMonth() + 1).padStart(2, '0');
-        monthlyTotals[month] = (monthlyTotals[month] || 0) + item.price;
+        if (!monthlyTotals[month]) {
+            monthlyTotals[month] = [];
+        }
+        monthlyTotals[month].push(item);
     });
 
-    const table = document.getElementById('monthly-table');
-    let tableHTML = `<thead><tr><th>연월</th><th>결제 금액</th></tr></thead><tbody>`;
+    const accordionContainer = document.getElementById('monthly-accordion');
+    accordionContainer.innerHTML = ''; // 이전 내용 초기화
+    
     const sortedMonths = Object.keys(monthlyTotals).sort();
     
     sortedMonths.forEach(month => {
-        tableHTML += `<tr><td>${month}</td><td>₩${monthlyTotals[month].toLocaleString()}</td></tr>`;
-    });
-    table.innerHTML = tableHTML + `</tbody>`;
+        const items = monthlyTotals[month];
+        const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
 
-    displayMonthlyChart(monthlyTotals);
+        let detailsHTML = '<table>';
+        items.forEach(item => {
+            detailsHTML += `
+                <tr>
+                    <td>${item.date.toISOString().split('T')[0]}</td>
+                    <td>${item.title}</td>
+                    <td>₩${item.price.toLocaleString()}</td>
+                </tr>
+            `;
+        });
+        detailsHTML += '</table>';
+
+        const monthItem = document.createElement('div');
+        monthItem.className = 'month-item';
+        monthItem.innerHTML = `
+            <div class="month-summary">
+                <span>${month}</span>
+                <span>₩${totalAmount.toLocaleString()}</span>
+            </div>
+            <div class="month-details">
+                ${detailsHTML}
+            </div>
+        `;
+        accordionContainer.appendChild(monthItem);
+    });
+
+    displayMonthlyChart(Object.keys(monthlyTotals).reduce((acc, month) => {
+        acc[month] = monthlyTotals[month].reduce((sum, item) => sum + item.price, 0);
+        return acc;
+    }, {}));
 }
 
 function displayMonthlyChart(monthlyData) {
@@ -166,27 +199,22 @@ function displayFullHistory(data) {
 }
 
 function setupEventListeners() {
+    // 필터 버튼 이벤트 리스너
     const buttons = document.querySelectorAll('.filter-btn');
     const searchInput = document.getElementById('search-input');
-
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             buttons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             searchInput.value = "";
-
             const filter = button.dataset.filter;
             let filteredData;
-            
             if (filter === 'all') {
                 filteredData = allTrickcalData;
             } else if (filter === 'pass_basic') {
                 const passKeywords = ["리바이브 패스", "트릭컬 패스"];
-                filteredData = allTrickcalData.filter(item => 
-                    passKeywords.some(keyword => item.title.includes(keyword))
-                );
+                filteredData = allTrickcalData.filter(item => passKeywords.some(keyword => item.title.includes(keyword)));
             } else if (filter === 'pass_sashik') {
-                // "사복패스" 조건 추가
                 filteredData = allTrickcalData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
             } else {
                 filteredData = allTrickcalData.filter(item => item.title.includes(filter));
@@ -195,19 +223,28 @@ function setupEventListeners() {
         });
     });
 
+    // 검색란 이벤트 리스너
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
-        
         if (searchTerm) {
             buttons.forEach(btn => btn.classList.remove('active'));
         } else {
             document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
         }
-
         const filteredData = allTrickcalData.filter(item => 
             item.title.toLowerCase().includes(searchTerm)
         );
         displayFullHistory(filteredData);
+    });
+
+    // 아코디언 이벤트 리스너
+    const accordionContainer = document.getElementById('monthly-accordion');
+    accordionContainer.addEventListener('click', function(e) {
+        const summary = e.target.closest('.month-summary');
+        if (summary) {
+            const item = summary.parentElement;
+            item.classList.toggle('active');
+        }
     });
 }
 

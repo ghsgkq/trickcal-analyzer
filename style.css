@@ -136,6 +136,53 @@ td:last-child {
     font-weight: 500;
 }
 
+#monthly-accordion .month-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    overflow: hidden;
+}
+
+#monthly-accordion .month-summary {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#monthly-accordion .month-summary:hover {
+    background-color: #f1f1f1;
+}
+
+#monthly-accordion .month-summary::before {
+    content: '▶';
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+}
+
+#monthly-accordion .month-item.active .month-summary::before {
+    transform: rotate(90deg);
+}
+
+#monthly-accordion .month-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+    background-color: #fff;
+}
+
+#monthly-accordion .month-item.active .month-details {
+    max-height: 500px; /* 펼쳐질 최대 높이, 내용물에 맞게 조절 가능 */
+    overflow-y: auto;
+}
+
+#monthly-accordion .month-details table {
+    margin-top: 0;
+    border-top: 1px solid #ddd;
+}
+
 .chart-title {
     margin-top: 30px;
     padding-bottom: 10px;
@@ -155,21 +202,10 @@ td:last-child {
     -webkit-overflow-scrolling: touch;
 }
 
-#monthly-chart-container::-webkit-scrollbar {
-    height: 8px;
-}
-#monthly-chart-container::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 10px;
-}
-#monthly-chart-container::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 10px;
-}
-#monthly-chart-container::-webkit-scrollbar-thumb:hover {
-    background: #aaa;
-}
-
+#monthly-chart-container::-webkit-scrollbar { height: 8px; }
+#monthly-chart-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+#monthly-chart-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+#monthly-chart-container::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
 .chart-bar-wrapper {
     display: flex;
@@ -204,20 +240,14 @@ td:last-child {
     margin-top: 5px;
     font-size: 0.75em;
     color: #555;
-    white-space: pre; /* 줄바꿈(\n) 문자를 인식하게 함 */
-    
-    /* 아래 속성들을 추가하여 정렬 문제를 해결합니다 */
-    height: 2.5em; /* 두 줄 텍스트가 들어갈 고정 높이 확보 */
+    white-space: pre;
+    height: 2.5em;
     display: flex;
-    justify-content: center; /* 텍스트 가로 중앙 정렬 */
-    align-items: center; /* 텍스트 세로 중앙 정렬 */
+    justify-content: center;
+    align-items: center;
 }
 
 @media (max-width: 600px) {
-    .chart-bar-wrapper {
-        min-width: 55px;
-    }
-    .chart-bar {
-        width: 30px;
-    }
+    .chart-bar-wrapper { min-width: 55px; }
+    .chart-bar { width: 30px; }
 }
