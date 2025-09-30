@@ -14,6 +14,10 @@
         <input type="file" id="jsonFile" accept=".json">
 
         <div id="summary" class="summary-box"></div>
+        
+        <div id="daily-summary" class="summary-box secondary"></div>
+        
+        <div id="pass-summary" class="summary-box tertiary"></div>
 
         <div id="monthly-report">
             <h2>📅 월별 결제 금액 요약</h2>
@@ -23,6 +27,14 @@
 
         <div id="full-history">
             <h2>🧾 전체 결제 내역</h2>
+            
+            <div id="filter-controls">
+                <button class="filter-btn active" data-filter="all">전체 보기</button>
+                <button class="filter-btn" data-filter="데일리 왕사탕 공물">데일리 왕사탕</button>
+                <button class="filter-btn" data-filter="데일리 별사탕 공물">데일리 별사탕</button>
+                <button class="filter-btn" data-filter="데일리 엘리프 공물">데일리 엘리프</button>
+                <button class="filter-btn" data-filter="패스">리바이브/트릭컬 패스</button>
+            </div>
             <table id="details-table">
                 </table>
         </div>
