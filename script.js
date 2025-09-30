@@ -34,7 +34,8 @@ function processData(orders) {
             const price = cleanPrice(order.totalPrice);
             const refund = cleanPrice(order.refundAmount);
             const netPrice = price - refund;
-            const date = new Date(order.creationTime.replace('Z', ''));
+            const date = new Date(order.creationTime);
+
             allTrickcalData.push({ date, title, price: netPrice });
         }
     });
@@ -77,7 +78,7 @@ function displayPassReport(data) {
 
 function displaySashikPassReport(data) {
     const sashikTotal = data
-        .filter(item => item.title.includes("사복 패스"))
+        .filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스")) // "사복패스" 조건 추가
         .reduce((sum, item) => sum + item.price, 0);
     const sashikSummaryDiv = document.getElementById('sashik-pass-summary');
     sashikSummaryDiv.innerHTML = `사복 패스 총 결제액: <strong>₩${sashikTotal.toLocaleString()}</strong>`;
@@ -120,7 +121,6 @@ function displayMonthlyChart(monthlyData) {
 
     sortedMonths.forEach(month => {
         const amount = monthlyData[month];
-        // 막대의 최대 높이를 90%로 제한하여 상단에 텍스트 공간 확보
         const barHeight = (amount / maxAmount) * 90; 
         
         const currentYear = month.substring(2, 4);
@@ -186,7 +186,8 @@ function setupEventListeners() {
                     passKeywords.some(keyword => item.title.includes(keyword))
                 );
             } else if (filter === 'pass_sashik') {
-                filteredData = allTrickcalData.filter(item => item.title.includes("사복 패스"));
+                // "사복패스" 조건 추가
+                filteredData = allTrickcalData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
             } else {
                 filteredData = allTrickcalData.filter(item => item.title.includes(filter));
             }
