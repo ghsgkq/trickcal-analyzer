@@ -59,8 +59,23 @@ input[type="file"] {
     margin-top: -10px;
 }
 
-#filter-controls {
-    margin: 20px 0 10px 0;
+#filter-section {
+    margin: 20px 0;
+}
+
+#search-container {
+    margin-bottom: 15px; /* 검색창과 버튼 사이의 간격 */
+}
+
+#search-input {
+    width: 100%; /* 너비를 100%로 설정 */
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+}
+
+#button-container {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -88,7 +103,7 @@ input[type="file"] {
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 th, td {
