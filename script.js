@@ -27,7 +27,7 @@ function processData(orders) {
     allTrickcalData = [];
     orders.forEach(item => {
         const order = item.orderHistory;
-        if (!order || !order.lineItem || !order.lineItem.length === 0) return;
+        if (!order || !order.lineItem || order.lineItem.length === 0) return;
 
         const title = order.lineItem[0].doc.title || "";
         if (title.includes("트릭컬 리바이브")) {
@@ -44,7 +44,7 @@ function processData(orders) {
     displaySummary(allTrickcalData);
     displayDailyReport(allTrickcalData);
     displayPassReport(allTrickcalData);
-    displaySashikPassReport(allTrickcalData); // <--- '사복 패스' 함수 호출 추가
+    displaySashikPassReport(allTrickcalData);
     displayMonthlyReport(allTrickcalData);
     displayFullHistory(allTrickcalData);
     setupEventListeners();
@@ -64,7 +64,6 @@ function displayDailyReport(data) {
     dailySummaryDiv.innerHTML = `데일리 3종(왕사탕, 엘리프, 별사탕) 총 결제액: <strong>₩${dailyTotal.toLocaleString()}</strong>`;
     dailySummaryDiv.style.display = 'block';
 }
-
 
 function displayPassReport(data) {
     const passKeywords = ["리바이브 패스", "트릭컬 패스"];
@@ -100,6 +99,51 @@ function displayMonthlyReport(data) {
         tableHTML += `<tr><td>${month}</td><td>₩${monthlyTotals[month].toLocaleString()}</td></tr>`;
     });
     table.innerHTML = tableHTML + `</tbody>`;
+
+    displayMonthlyChart(monthlyTotals);
+}
+
+function displayMonthlyChart(monthlyData) {
+    const chartContainer = document.getElementById('monthly-chart-container');
+    const sortedMonths = Object.keys(monthlyData).sort();
+    
+    if(sortedMonths.length === 0) {
+        chartContainer.innerHTML = '차트를 표시할 데이터가 없습니다.';
+        return;
+    }
+
+    const amounts = sortedMonths.map(month => monthlyData[month]);
+    const maxAmount = Math.max(...amounts, 1);
+
+    let chartHTML = '';
+    let lastYear = ''; // 이전 년도를 기억할 변수
+
+    sortedMonths.forEach(month => {
+        const amount = monthlyData[month];
+        const barHeight = (amount / maxAmount) * 100;
+        
+        const currentYear = month.substring(2, 4); // '2024-01' -> '24'
+        const currentMonth = month.substring(5); // '2024-01' -> '01'
+        
+        let label = '';
+        // 연도가 바뀌거나 첫번째 데이터일 경우 연도 표시
+        if (currentYear !== lastYear) {
+            label = `${currentYear}년\n${currentMonth}월`;
+            lastYear = currentYear;
+        } else {
+            label = `${currentMonth}월`;
+        }
+
+        chartHTML += `
+            <div class="chart-bar-wrapper">
+                <div class="chart-amount">₩${amount.toLocaleString()}</div>
+                <div class="chart-bar" style="height: ${barHeight}%;" title="${month}: ₩${amount.toLocaleString()}"></div>
+                <div class="chart-label">${label}</div>
+            </div>
+        `;
+    });
+
+    chartContainer.innerHTML = chartHTML;
 }
 
 function displayFullHistory(data) {
