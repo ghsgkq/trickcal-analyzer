@@ -59,20 +59,27 @@ input[type="file"] {
     margin-top: -10px;
 }
 
+.summary-box.quaternary {
+    background-color: #f3e5f5; /* 연한 보라색 계열 */
+    border-color: #e1bee7;
+    font-size: 1.1em;
+    margin-top: -10px;
+}
+
 #filter-section {
     margin: 20px 0;
 }
 
 #search-container {
-    margin-bottom: 15px; /* 검색창과 버튼 사이의 간격 */
+    margin-bottom: 15px;
 }
 
 #search-input {
-    width: 100%; /* 너비를 100%로 설정 */
+    width: 100%;
     padding: 10px 15px;
     border: 1px solid #ccc;
     border-radius: 20px;
-    box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+    box-sizing: border-box;
 }
 
 #button-container {

@@ -27,7 +27,7 @@ function processData(orders) {
     allTrickcalData = [];
     orders.forEach(item => {
         const order = item.orderHistory;
-        if (!order || !order.lineItem || order.lineItem.length === 0) return;
+        if (!order || !order.lineItem || !order.lineItem.length === 0) return;
 
         const title = order.lineItem[0].doc.title || "";
         if (title.includes("트릭컬 리바이브")) {
@@ -44,9 +44,10 @@ function processData(orders) {
     displaySummary(allTrickcalData);
     displayDailyReport(allTrickcalData);
     displayPassReport(allTrickcalData);
+    displaySashikPassReport(allTrickcalData); // <--- '사복 패스' 함수 호출 추가
     displayMonthlyReport(allTrickcalData);
     displayFullHistory(allTrickcalData);
-    setupEventListeners(); // <-- 함수 이름 변경 및 로직 통합
+    setupEventListeners();
 }
 
 function displaySummary(data) {
@@ -64,13 +65,24 @@ function displayDailyReport(data) {
     dailySummaryDiv.style.display = 'block';
 }
 
+
 function displayPassReport(data) {
+    const passKeywords = ["리바이브 패스", "트릭컬 패스"];
     const passTotal = data
-        .filter(item => item.title.includes("리바이브 패스") || item.title.includes("트릭컬 패스"))
+        .filter(item => passKeywords.some(keyword => item.title.includes(keyword)))
         .reduce((sum, item) => sum + item.price, 0);
     const passSummaryDiv = document.getElementById('pass-summary');
     passSummaryDiv.innerHTML = `리바이브/트릭컬 패스 총 결제액: <strong>₩${passTotal.toLocaleString()}</strong>`;
     passSummaryDiv.style.display = 'block';
+}
+
+function displaySashikPassReport(data) {
+    const sashikTotal = data
+        .filter(item => item.title.includes("사복 패스"))
+        .reduce((sum, item) => sum + item.price, 0);
+    const sashikSummaryDiv = document.getElementById('sashik-pass-summary');
+    sashikSummaryDiv.innerHTML = `사복 패스 총 결제액: <strong>₩${sashikTotal.toLocaleString()}</strong>`;
+    sashikSummaryDiv.style.display = 'block';
 }
 
 function displayMonthlyReport(data) {
@@ -83,6 +95,7 @@ function displayMonthlyReport(data) {
     const table = document.getElementById('monthly-table');
     let tableHTML = `<thead><tr><th>연월</th><th>결제 금액</th></tr></thead><tbody>`;
     const sortedMonths = Object.keys(monthlyTotals).sort();
+    
     sortedMonths.forEach(month => {
         tableHTML += `<tr><td>${month}</td><td>₩${monthlyTotals[month].toLocaleString()}</td></tr>`;
     });
@@ -112,22 +125,24 @@ function setupEventListeners() {
     const buttons = document.querySelectorAll('.filter-btn');
     const searchInput = document.getElementById('search-input');
 
-    // 필터 버튼 클릭 이벤트
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             buttons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
-            searchInput.value = ""; // 검색란 초기화
+            searchInput.value = "";
 
             const filter = button.dataset.filter;
             let filteredData;
-
+            
             if (filter === 'all') {
                 filteredData = allTrickcalData;
-            } else if (filter === '패스') {
+            } else if (filter === 'pass_basic') {
+                const passKeywords = ["리바이브 패스", "트릭컬 패스"];
                 filteredData = allTrickcalData.filter(item => 
-                    item.title.includes("리바이브 패스") || item.title.includes("트릭컬 패스")
+                    passKeywords.some(keyword => item.title.includes(keyword))
                 );
+            } else if (filter === 'pass_sashik') {
+                filteredData = allTrickcalData.filter(item => item.title.includes("사복 패스"));
             } else {
                 filteredData = allTrickcalData.filter(item => item.title.includes(filter));
             }
@@ -135,15 +150,12 @@ function setupEventListeners() {
         });
     });
 
-    // 검색란 입력 이벤트 (실시간 필터링)
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
         
-        // 검색어가 있으면 모든 버튼의 활성 상태 해제
         if (searchTerm) {
             buttons.forEach(btn => btn.classList.remove('active'));
         } else {
-            // 검색어가 없으면 '전체 보기' 버튼 활성화
             document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
         }
 
@@ -157,3 +169,4 @@ function setupEventListeners() {
 // 페이지 로드 시 요약 섹션 숨기기
 document.getElementById('daily-summary').style.display = 'none';
 document.getElementById('pass-summary').style.display = 'none';
+document.getElementById('sashik-pass-summary').style.display = 'none';
