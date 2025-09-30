@@ -150,9 +150,30 @@ td:last-child {
     border: 1px solid #ddd;
     border-radius: 5px;
     margin-top: 10px;
-    overflow-x: auto;
+    overflow-x: auto; /* 가로 스크롤 활성화 */
     justify-content: flex-start;
+    -webkit-overflow-scrolling: touch; /* iOS에서 부드러운 스크롤 효과 추가 */
 }
+
+/* 스크롤바 스타일링 (모바일에서도 잘 보이도록) */
+#monthly-chart-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+#monthly-chart-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+#monthly-chart-container::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+#monthly-chart-container::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
 
 .chart-bar-wrapper {
     display: flex;
@@ -161,9 +182,10 @@ td:last-child {
     text-align: center;
     height: 100%;
     justify-content: flex-end;
-    min-width: 70px; /* 라벨 공간 확보를 위해 너비 증가 */
+    min-width: 70px; 
     flex-shrink: 0;
 }
+
 
 .chart-amount {
     font-size: 0.8em;
@@ -187,5 +209,15 @@ td:last-child {
     margin-top: 5px;
     font-size: 0.75em;
     color: #555;
-    white-space: pre; /* 줄바꿈을 위해 추가 */
+    white-space: pre;
+}
+
+
+@media (max-width: 600px) {
+    .chart-bar-wrapper {
+        min-width: 55px; /* 모바일에서 막대 최소 너비를 약간 줄임 */
+    }
+    .chart-bar {
+        width: 30px; /* 모바일에서 막대 너비를 약간 줄임 */
+    }
 }
