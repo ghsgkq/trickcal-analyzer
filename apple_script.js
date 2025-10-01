@@ -1,21 +1,23 @@
 // 전역 변수로 데이터 저장
-let allTrickcalData = [];
+let allAppleData = [];
 
-document.getElementById('jsonFile').addEventListener('change', function(event) {
+document.getElementById('htmlFile').addEventListener('change', function(event) {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
-            const orders = JSON.parse(e.target.result);
-            processData(orders);
+            const htmlContent = e.target.result;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, "text/html");
+            processHtmlData(doc);
         } catch (error) {
-            alert('잘못된 JSON 파일입니다.');
-            console.error("JSON 파싱 오류:", error);
+            alert('잘못된 HTML 파일입니다.');
+            console.error("HTML 파싱 오류:", error);
         }
     };
-    reader.readAsText(file);
+    reader.readAsText(file, 'UTF-8');
 });
 
 function cleanPrice(priceStr) {
@@ -23,31 +25,44 @@ function cleanPrice(priceStr) {
     return parseInt(priceStr.replace(/[^0-9]/g, ''), 10) || 0;
 }
 
-function processData(orders) {
-    allTrickcalData = [];
-    orders.forEach(item => {
-        const order = item.orderHistory;
-        if (!order || !order.lineItem || order.lineItem.length === 0) return;
+function parseKoreanDate(dateStr) {
+    const parts = dateStr.match(/(\d{4})년 (\d{1,2})월 (\d{1,2})일/);
+    if (!parts) return null;
+    // new Date() 대신 Date.UTC()를 사용하여 날짜를 UTC 기준으로 처리합니다.
+    // 이렇게 하면 시간대 변환으로 인한 날짜 밀림 현상이 사라집니다.
+    return new Date(Date.UTC(parts[1], parts[2] - 1, parts[3]));
+}
 
-        const title = order.lineItem[0].doc.title || "";
-        if (title.includes("트릭컬 리바이브")) {
-            const price = cleanPrice(order.totalPrice);
-            const refund = cleanPrice(order.refundAmount);
-            const netPrice = price - refund;
-            const date = new Date(order.creationTime);
+function processHtmlData(doc) {
+    allAppleData = [];
+    const purchaseElements = doc.querySelectorAll('.purchase');
 
-            allTrickcalData.push({ date, title, price: netPrice });
+    purchaseElements.forEach(purchase => {
+        const dateEl = purchase.querySelector('.invoice-date');
+        const titleEl = purchase.querySelector('.pli-title div');
+        const priceEl = purchase.querySelector('.pli-price');
+        const publisherEl = purchase.querySelector('.pli-publisher');
+
+        if (dateEl && titleEl && priceEl) {
+            const date = parseKoreanDate(dateEl.textContent.trim());
+            const title = titleEl.getAttribute('aria-label').trim();
+            const price = cleanPrice(priceEl.textContent.trim());
+            const publisher = publisherEl ? publisherEl.textContent.trim() : "";
+
+            if (date && publisher.includes("트릭컬 리바이브")) {
+                allAppleData.push({ date, title, price });
+            }
         }
     });
-
-    allTrickcalData.sort((a, b) => a.date - b.date);
     
-    displaySummary(allTrickcalData);
-    displayDailyReport(allTrickcalData);
-    displayPassReport(allTrickcalData);
-    displaySashikPassReport(allTrickcalData);
-    displayMonthlyReport(allTrickcalData);
-    displayFullHistory(allTrickcalData);
+    allAppleData.sort((a, b) => a.date - b.date);
+
+    displaySummary(allAppleData);
+    displayDailyReport(allAppleData);
+    displayPassReport(allAppleData);
+    displaySashikPassReport(allAppleData);
+    displayMonthlyReport(allAppleData);
+    displayFullHistory(allAppleData);
     setupEventListeners();
 }
 
@@ -85,7 +100,6 @@ function displaySashikPassReport(data) {
     sashikSummaryDiv.style.display = 'block';
 }
 
-
 function displayMonthlyReport(data) {
     const monthlyTotals = {};
     data.forEach(item => {
@@ -97,8 +111,7 @@ function displayMonthlyReport(data) {
     });
 
     const accordionContainer = document.getElementById('monthly-accordion');
-    accordionContainer.innerHTML = ''; // 이전 내용 초기화
-    
+    accordionContainer.innerHTML = '';
     const sortedMonths = Object.keys(monthlyTotals).sort();
     
     sortedMonths.forEach(month => {
@@ -130,7 +143,7 @@ function displayMonthlyReport(data) {
         `;
         accordionContainer.appendChild(monthItem);
     });
-
+    
     displayMonthlyChart(Object.keys(monthlyTotals).reduce((acc, month) => {
         acc[month] = monthlyTotals[month].reduce((sum, item) => sum + item.price, 0);
         return acc;
@@ -148,34 +161,25 @@ function displayMonthlyChart(monthlyData) {
 
     const amounts = sortedMonths.map(month => monthlyData[month]);
     const maxAmount = Math.max(...amounts, 1);
-
     let chartHTML = '';
     let lastYear = '';
 
     sortedMonths.forEach(month => {
         const amount = monthlyData[month];
-        const barHeight = (amount / maxAmount) * 90; 
-        
+        const barHeight = (amount / maxAmount) * 90;
         const currentYear = month.substring(2, 4);
         const currentMonth = month.substring(5);
-        
-        let label = '';
-        if (currentYear !== lastYear) {
-            label = `${currentYear}년\n${currentMonth}월`;
-            lastYear = currentYear;
-        } else {
-            label = `${currentMonth}월`;
-        }
+        let label = (currentYear !== lastYear) ? `${currentYear}년\n${currentMonth}월` : `${currentMonth}월`;
+        lastYear = currentYear;
 
         chartHTML += `
-            <div class="chart-bar-wrapper"> 
+            <div class="chart-bar-wrapper">
                 <div class="chart-amount">₩${amount.toLocaleString()}</div>
                 <div class="chart-bar" style="height: ${barHeight}%;" title="${month}: ₩${amount.toLocaleString()}"></div>
                 <div class="chart-label">${label}</div>
             </div>
         `;
     });
-
     chartContainer.innerHTML = chartHTML;
 }
 
@@ -199,45 +203,49 @@ function displayFullHistory(data) {
 }
 
 function setupEventListeners() {
-    // 필터 버튼 이벤트 리스너
     const buttons = document.querySelectorAll('.filter-btn');
     const searchInput = document.getElementById('search-input');
+
     buttons.forEach(button => {
         button.addEventListener('click', () => {
             buttons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             searchInput.value = "";
+
             const filter = button.dataset.filter;
             let filteredData;
+            
             if (filter === 'all') {
-                filteredData = allTrickcalData;
+                filteredData = allAppleData;
             } else if (filter === 'pass_basic') {
                 const passKeywords = ["리바이브 패스", "트릭컬 패스"];
-                filteredData = allTrickcalData.filter(item => passKeywords.some(keyword => item.title.includes(keyword)));
+                filteredData = allAppleData.filter(item => 
+                    passKeywords.some(keyword => item.title.includes(keyword))
+                );
             } else if (filter === 'pass_sashik') {
-                filteredData = allTrickcalData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
+                filteredData = allAppleData.filter(item => item.title.includes("사복 패스") || item.title.includes("사복패스"));
             } else {
-                filteredData = allTrickcalData.filter(item => item.title.includes(filter));
+                filteredData = allAppleData.filter(item => item.title.includes(filter));
             }
             displayFullHistory(filteredData);
         });
     });
 
-    // 검색란 이벤트 리스너
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
+        
         if (searchTerm) {
             buttons.forEach(btn => btn.classList.remove('active'));
         } else {
             document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
         }
-        const filteredData = allTrickcalData.filter(item => 
+
+        const filteredData = allAppleData.filter(item => 
             item.title.toLowerCase().includes(searchTerm)
         );
         displayFullHistory(filteredData);
     });
-
-    // 아코디언 이벤트 리스너
+    
     const accordionContainer = document.getElementById('monthly-accordion');
     accordionContainer.addEventListener('click', function(e) {
         const summary = e.target.closest('.month-summary');

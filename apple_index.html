@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Play 결제 내역 분석기</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Apple Store 결제 내역 분석기</title>
+    <link rel="stylesheet" href="apple_style.css">
 </head>
 <body>
     <div class="container">
-        <h1>🎮 트릭컬 리바이브 결제 내역 분석</h1>
-        <a href="apple_index.html" class="nav-link"> Apple 결제 내역 분석기로 이동</a>
+        <h1> Apple Store 결제 내역 분석</h1>
+        <a href="index.html" class="nav-link">🎮 Google Play 결제 내역 분석기로 이동</a>
         <p>
-            Google Play에서 다운로드한 'Order History.json' 파일을 업로드하세요. 
-            (<a href="guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
+            Apple에서 다운로드한 결제 내역 HTML 파일을 업로드하세요. 
+            (<a href="apple_guide.html" target="_blank">파일 다운로드 가이드 보기</a>)
         </p>
-        
-        <input type="file" id="jsonFile" accept=".json">
+        <input type="file" id="htmlFile" accept=".html, .htm">
 
         <div id="summary" class="summary-box"></div>
         <div id="daily-summary" class="summary-box secondary"></div>
@@ -30,6 +29,7 @@
             <div id="monthly-chart-container">
                 </div>
         </div>
+
         <div id="full-history">
             <h2>🧾 전체 결제 내역</h2>
             
@@ -51,6 +51,6 @@
                 </table>
         </div>
     </div>
-    <script src="script.js"></script>
+    <script src="apple_script.js"></script>
 </body>
 </html>

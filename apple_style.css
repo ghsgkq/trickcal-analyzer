@@ -174,7 +174,7 @@ td:last-child {
 }
 
 #monthly-accordion .month-item.active .month-details {
-    max-height: 500px; /* 펼쳐질 최대 높이, 내용물에 맞게 조절 가능 */
+    max-height: 500px;
     overflow-y: auto;
 }
 
@@ -207,6 +207,7 @@ td:last-child {
 #monthly-chart-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
 #monthly-chart-container::-webkit-scrollbar-thumb:hover { background: #aaa; }
 
+
 .chart-bar-wrapper {
     display: flex;
     flex-direction: column;
@@ -220,7 +221,6 @@ td:last-child {
 
 .chart-amount {
     font-size: 0.8em;
-    color: #333;
     font-weight: bold;
     margin-bottom: 5px;
 }
@@ -232,14 +232,9 @@ td:last-child {
     transition: height 0.5s ease-out;
 }
 
-.chart-bar:hover {
-    background-color: #2980b9;
-}
-
 .chart-label {
     margin-top: 5px;
     font-size: 0.75em;
-    color: #555;
     white-space: pre;
     height: 2.5em;
     display: flex;
