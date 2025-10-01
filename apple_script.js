@@ -28,31 +28,41 @@ function cleanPrice(priceStr) {
 function parseKoreanDate(dateStr) {
     const parts = dateStr.match(/(\d{4})년 (\d{1,2})월 (\d{1,2})일/);
     if (!parts) return null;
-    // new Date() 대신 Date.UTC()를 사용하여 날짜를 UTC 기준으로 처리합니다.
-    // 이렇게 하면 시간대 변환으로 인한 날짜 밀림 현상이 사라집니다.
     return new Date(Date.UTC(parts[1], parts[2] - 1, parts[3]));
 }
 
 function processHtmlData(doc) {
     allAppleData = [];
+    // 1. 각 '주문' 단위를 모두 선택합니다.
     const purchaseElements = doc.querySelectorAll('.purchase');
 
     purchaseElements.forEach(purchase => {
         const dateEl = purchase.querySelector('.invoice-date');
-        const titleEl = purchase.querySelector('.pli-title div');
-        const priceEl = purchase.querySelector('.pli-price');
-        const publisherEl = purchase.querySelector('.pli-publisher');
+        if (!dateEl) return;
 
-        if (dateEl && titleEl && priceEl) {
-            const date = parseKoreanDate(dateEl.textContent.trim());
-            const title = titleEl.getAttribute('aria-label').trim();
-            const price = cleanPrice(priceEl.textContent.trim());
-            const publisher = publisherEl ? publisherEl.textContent.trim() : "";
+        const date = parseKoreanDate(dateEl.textContent.trim());
+        if (!date) return;
+        
+        // 2. 해당 주문 내의 '모든 상품 목록(li)'을 선택합니다.
+        const itemElements = purchase.querySelectorAll('li.pli');
 
-            if (date && publisher.includes("트릭컬 리바이브")) {
-                allAppleData.push({ date, title, price });
+        // 3. 각 상품을 순회하며 개별적으로 데이터를 추출합니다.
+        itemElements.forEach(item => {
+            const titleEl = item.querySelector('.pli-title div');
+            const priceEl = item.querySelector('.pli-price');
+            const publisherEl = item.querySelector('.pli-publisher');
+
+            if (titleEl && priceEl) {
+                const title = titleEl.getAttribute('aria-label').trim();
+                const price = cleanPrice(priceEl.textContent.trim());
+                const publisher = publisherEl ? publisherEl.textContent.trim() : "";
+                
+                // 4. 퍼블리셔 기준으로 필터링합니다.
+                if (publisher.includes("트릭컬 리바이브")) {
+                    allAppleData.push({ date, title, price });
+                }
             }
-        }
+        });
     });
     
     allAppleData.sort((a, b) => a.date - b.date);
